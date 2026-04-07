@@ -1,5 +1,5 @@
-import BriefFlowHero from './components/BriefFlowHero'
+import PdfToImages from './components/PdfToImages'
 
 export default function App() {
-  return <BriefFlowHero />
+  return <PdfToImages />
 }
