@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { Conversation, Message } from '../types'
 
 const STORAGE_KEY = 'medical_ai_conversations'
+const API_KEY_STORAGE = 'medical_ai_api_key'
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
@@ -96,6 +97,14 @@ export function useStorage() {
     return conversations.find(c => c.id === id)
   }, [conversations])
 
+  const getApiKey = useCallback((): string => {
+    return localStorage.getItem(API_KEY_STORAGE) ?? ''
+  }, [])
+
+  const setApiKey = useCallback((key: string) => {
+    localStorage.setItem(API_KEY_STORAGE, key.trim())
+  }, [])
+
   return {
     conversations,
     createConversation,
@@ -103,5 +112,7 @@ export function useStorage() {
     deleteConversation,
     clearAll,
     getConversation,
+    getApiKey,
+    setApiKey,
   }
 }
