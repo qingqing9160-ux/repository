@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Conversation } from '../types'
+import { DOC_ICON_MAP, SearchLitIcon, PolicyIcon, WriteIcon } from './DocIcons'
 
 interface HomePageProps {
   conversations: Conversation[]
@@ -7,20 +8,20 @@ interface HomePageProps {
 }
 
 const DOC_TYPES = [
-  { id: 'work-summary',       icon: '📊', label: '工作总结',   gradient: 'from-blue-400 to-blue-600' },
-  { id: 'incident-report',    icon: '⚠️',  label: '不良事件',   gradient: 'from-rose-400 to-rose-500' },
-  { id: 'application-report', icon: '📋', label: '采购申请',   gradient: 'from-violet-400 to-violet-600' },
-  { id: 'annual-plan',        icon: '📅', label: '年度计划',   gradient: 'from-indigo-400 to-indigo-600' },
-  { id: 'handover-report',    icon: '🔄', label: '交接班报告', gradient: 'from-amber-400 to-amber-500' },
-  { id: 'ethics-review',      icon: '⚖️',  label: '伦理审查',   gradient: 'from-purple-400 to-purple-600' },
-  { id: 'complaint-response', icon: '💬', label: '投诉回复',   gradient: 'from-pink-400 to-pink-500' },
-  { id: 'transfer-record',    icon: '🏥', label: '转科记录',   gradient: 'from-cyan-400 to-cyan-600' },
+  { id: 'work-summary',       label: '工作总结'   },
+  { id: 'incident-report',    label: '不良事件'   },
+  { id: 'application-report', label: '采购申请'   },
+  { id: 'annual-plan',        label: '年度计划'   },
+  { id: 'handover-report',    label: '交接班报告' },
+  { id: 'ethics-review',      label: '伦理审查'   },
+  { id: 'complaint-response', label: '投诉回复'   },
+  { id: 'transfer-record',    label: '转科记录'   },
 ]
 
 const QUICK_TOOLS = [
-  { icon: '🔬', label: '查文献', desc: '搜索医学期刊与临床指南', category: 'search' as Conversation['category'], prompt: '请帮我查询相关医学文献：' },
-  { icon: '📜', label: '查政策', desc: '解读卫健委政策法规通知', category: 'policy' as Conversation['category'], prompt: '请帮我查询相关政策法规：' },
-  { icon: '✍️',  label: '写文书', desc: '一句话生成专业医疗文书', category: 'document' as Conversation['category'], prompt: '请帮我撰写：' },
+  { Icon: SearchLitIcon, label: '查文献', desc: '搜索医学期刊与临床指南', category: 'search' as Conversation['category'], prompt: '请帮我查询相关医学文献：' },
+  { Icon: PolicyIcon,    label: '查政策', desc: '解读卫健委政策法规通知', category: 'policy' as Conversation['category'], prompt: '请帮我查询相关政策法规：' },
+  { Icon: WriteIcon,     label: '写文书', desc: '一句话生成专业医疗文书', category: 'document' as Conversation['category'], prompt: '请帮我撰写：' },
 ]
 
 const GLASS = 'bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl shadow-[0_4px_24px_rgba(99,102,241,0.08)]'
@@ -62,16 +63,19 @@ export default function HomePage({ conversations, onStartChat }: HomePageProps) 
 
           {/* 4×2 Grid */}
           <div className="grid grid-cols-4 gap-2.5">
-            {DOC_TYPES.map(doc => (
-              <button key={doc.id}
-                onClick={() => onStartChat(`请帮我按照标准格式生成一份"${doc.label}"`, 'document')}
-                className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/60 hover:bg-white/90 border border-white/80 hover:border-indigo-100 hover:shadow-md transition-all group">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${doc.gradient} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform`}>
-                  <span className="text-lg">{doc.icon}</span>
-                </div>
-                <span className="text-xs text-gray-700 font-medium">{doc.label}</span>
-              </button>
-            ))}
+            {DOC_TYPES.map(doc => {
+              const Icon = DOC_ICON_MAP[doc.id]
+              return (
+                <button key={doc.id}
+                  onClick={() => onStartChat(`请帮我按照标准格式生成一份"${doc.label}"`, 'document')}
+                  className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/50 hover:bg-white/80 border border-white/70 hover:border-violet-200 hover:shadow-md transition-all group">
+                  <div className="group-hover:scale-110 transition-transform drop-shadow-md">
+                    {Icon && <Icon size={44} />}
+                  </div>
+                  <span className="text-xs text-gray-700 font-medium">{doc.label}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -122,8 +126,8 @@ export default function HomePage({ conversations, onStartChat }: HomePageProps) 
           <button key={tool.label}
             onClick={() => onStartChat(tool.prompt, tool.category)}
             className={`${GLASS} flex items-center gap-4 p-4 hover:shadow-lg transition-all group text-left`}>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform shrink-0">
-              <span className="text-xl">{tool.icon}</span>
+            <div className="group-hover:scale-110 transition-transform shrink-0 drop-shadow-md">
+              <tool.Icon size={44} />
             </div>
             <div>
               <p className="font-semibold text-gray-800 text-sm">{tool.label}</p>
