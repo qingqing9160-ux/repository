@@ -60,7 +60,7 @@ function MessageBubble({ message }: { message: Message }) {
                 p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
                 h2: ({ children }) => <h2 className="font-bold text-gray-900 mt-3 mb-1.5 text-sm">{children}</h2>,
                 h3: ({ children }) => <h3 className="font-semibold text-gray-800 mt-2 mb-1 text-sm">{children}</h3>,
-                strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                strong: ({ children }) => <span>{children}</span>,
                 ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-2 pl-1">{children}</ul>,
                 ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-2 pl-1">{children}</ol>,
                 li: ({ children }) => <li className="text-gray-700">{children}</li>,
