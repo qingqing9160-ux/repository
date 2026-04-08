@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { Conversation, Message } from '../types'
 import { DOCUMENT_TEMPLATES } from '../data/templates'
 import { streamChat, ChatMessage } from '../services/ai'
@@ -38,14 +40,48 @@ function MessageBubble({ message }: { message: Message }) {
         style={isUser ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' } : {}}>
         {isUser ? '我' : '医'}
       </div>
-      <div className={`max-w-[75%] flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
-        <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words shadow-sm ${
+      <div className={`max-w-[78%] flex flex-col gap-1 ${isUser ? 'items-end' : 'items-start'}`}>
+        <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed break-words shadow-sm ${
           isUser
-            ? 'text-white rounded-tr-sm'
+            ? 'text-white rounded-tr-sm whitespace-pre-wrap'
             : `${GLASS} text-gray-800 rounded-tl-sm`
         }`}
           style={isUser ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' } : {}}>
-          {message.content}
+          {isUser ? message.content : (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer"
+                    className="text-indigo-600 underline underline-offset-2 hover:text-violet-700 transition-colors font-medium">
+                    {children}
+                  </a>
+                ),
+                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                h2: ({ children }) => <h2 className="font-bold text-gray-900 mt-3 mb-1.5 text-sm">{children}</h2>,
+                h3: ({ children }) => <h3 className="font-semibold text-gray-800 mt-2 mb-1 text-sm">{children}</h3>,
+                strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-2 pl-1">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-2 pl-1">{children}</ol>,
+                li: ({ children }) => <li className="text-gray-700">{children}</li>,
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-2 border-indigo-300 pl-3 my-2 text-gray-600 italic bg-indigo-50/50 rounded-r-lg py-1.5">
+                    {children}
+                  </blockquote>
+                ),
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-2">
+                    <table className="min-w-full text-xs border-collapse">{children}</table>
+                  </div>
+                ),
+                th: ({ children }) => <th className="border border-indigo-200 bg-indigo-50 px-2 py-1 font-semibold text-left">{children}</th>,
+                td: ({ children }) => <td className="border border-gray-200 px-2 py-1">{children}</td>,
+                code: ({ children }) => <code className="bg-gray-100 rounded px-1 py-0.5 text-xs font-mono text-indigo-700">{children}</code>,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          )}
         </div>
         <span className="text-xs text-gray-400 px-1">{time}</span>
       </div>
@@ -57,9 +93,30 @@ function StreamingBubble({ content }: { content: string }) {
   return (
     <div className="flex gap-3">
       <div className="w-8 h-8 rounded-full bg-white/80 border border-white/90 flex items-center justify-center shrink-0 text-sm font-bold text-indigo-600 shadow-sm">医</div>
-      <div className="max-w-[75%]">
-        <div className={`${GLASS} rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words text-gray-800 shadow-sm`}>
-          {content}
+      <div className="max-w-[78%]">
+        <div className={`${GLASS} rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed break-words text-gray-800 shadow-sm`}>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}
+            components={{
+              a: ({ href, children }) => (
+                <a href={href} target="_blank" rel="noopener noreferrer"
+                  className="text-indigo-600 underline underline-offset-2 hover:text-violet-700 transition-colors font-medium">
+                  {children}
+                </a>
+              ),
+              p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+              h2: ({ children }) => <h2 className="font-bold text-gray-900 mt-3 mb-1.5 text-sm">{children}</h2>,
+              h3: ({ children }) => <h3 className="font-semibold text-gray-800 mt-2 mb-1 text-sm">{children}</h3>,
+              strong: ({ children }) => <strong className="font-semibold text-gray-900">{children}</strong>,
+              ul: ({ children }) => <ul className="list-disc list-inside space-y-0.5 mb-2 pl-1">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal list-inside space-y-0.5 mb-2 pl-1">{children}</ol>,
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-2 border-indigo-300 pl-3 my-2 text-gray-600 italic bg-indigo-50/50 rounded-r-lg py-1.5">
+                  {children}
+                </blockquote>
+              ),
+            }}>
+            {content}
+          </ReactMarkdown>
           <span className="inline-block w-0.5 h-4 bg-indigo-500 ml-0.5 animate-pulse align-middle" />
         </div>
       </div>
