@@ -319,7 +319,7 @@ export default function ChatPage({
         </div>
 
         {/* Input Area */}
-        <div className={`${GLASS} px-6 py-4 rounded-none border-x-0 border-b-0`}>
+        <div className={`${GLASS} px-6 pt-4 pb-14 rounded-none border-x-0 border-b-0`}>
           {/* Template Panel */}
           {showTemplates && (
             <div className="mb-3 bg-white/80 backdrop-blur-xl border border-white/90 rounded-2xl p-3 max-h-52 overflow-y-auto shadow-lg">
