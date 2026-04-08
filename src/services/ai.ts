@@ -90,7 +90,7 @@ export async function streamChat(
     if (response.status === 401) {
       onError('API Key 无效或已过期，请在设置中重新填写')
     } else if (response.status === 429) {
-      onError('请求过于频繁，请稍后重试')
+      onError('请求频率超限：请等待约1分钟后重试。上传大文件时内容较多，建议稍作等待再发送')
     } else {
       onError(`请求失败（${response.status}）${detail ? '：' + detail : ''}`)
     }

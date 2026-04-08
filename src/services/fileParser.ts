@@ -9,7 +9,7 @@ export interface ParsedFile {
   truncated?: boolean   // true if content was cut for token safety
 }
 
-const MAX_CHARS = 300000  // ~75000 tokens, within GLM-4-Flash 128K context limit
+const MAX_CHARS = 80000  // ~20000 tokens, safe for GLM-4-Flash free tier per-request limit
 
 const EXT_LABELS: Record<string, string> = {
   xlsx: 'Excel 表格',
