@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { Conversation, Message } from '../types'
 import { DOCUMENT_TEMPLATES } from '../data/templates'
 import { streamChat, ChatMessage } from '../services/ai'
+import { parseFile, buildFileAnalysisPrompt, supportedExtensions, ParsedFile } from '../services/fileParser'
 import Sidebar from './Sidebar'
 
 interface ChatPageProps {
@@ -148,8 +149,12 @@ export default function ChatPage({
   const [streamingContent, setStreamingContent] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [showTemplates, setShowTemplates] = useState(false)
+  const [pendingFile, setPendingFile] = useState<ParsedFile | null>(null)
+  const [fileParseError, setFileParseError] = useState<string | null>(null)
+  const [isParsing, setIsParsing] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const activeConv = conversations.find(c => c.id === activeConversationId)
   const messages: Message[] = activeConv?.messages ?? []
@@ -165,9 +170,27 @@ export default function ChatPage({
     }
   }, [input])
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    setFileParseError(null)
+    setIsParsing(true)
+    try {
+      const parsed = await parseFile(file)
+      setPendingFile(parsed)
+    } catch (err) {
+      setFileParseError(err instanceof Error ? err.message : '文件解析失败')
+    } finally {
+      setIsParsing(false)
+    }
+  }
+
   const handleSend = useCallback(async () => {
     const text = input.trim()
-    if (!text || isLoading) return
+    const hasFile = pendingFile !== null
+    if ((!text && !hasFile) || isLoading) return
+
     setInput('')
     setErrorMsg(null)
 
@@ -176,13 +199,26 @@ export default function ChatPage({
       return
     }
 
+    // Build the actual message content
+    const messageContent = hasFile
+      ? buildFileAnalysisPrompt(pendingFile!, text || undefined)
+      : text
+
+    // User-facing display text (shorter)
+    const displayText = hasFile
+      ? `📎 ${pendingFile!.name}${text ? `\n${text}` : ''}`
+      : text
+
+    setPendingFile(null)
     setIsLoading(true)
     setStreamingContent('')
-    await onSendMessage(text)
+
+    // Save user message with display text
+    await onSendMessage(displayText)
 
     const history: ChatMessage[] = [
       ...messages.map(m => ({ role: m.role, content: m.content })),
-      { role: 'user' as const, content: text },
+      { role: 'user' as const, content: messageContent },
     ]
 
     let accumulated = ''
@@ -198,7 +234,7 @@ export default function ChatPage({
     if (!cancelled && accumulated) {
       await onSendMessage(`__assistant__${accumulated}`)
     }
-  }, [input, isLoading, apiKey, messages, onSendMessage])
+  }, [input, pendingFile, isLoading, apiKey, messages, onSendMessage])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
@@ -324,7 +360,51 @@ export default function ChatPage({
               onClick={() => setShowTemplates(v => !v)}>
               <span>📄</span>文书模板
             </button>
+            {/* Upload button */}
+            <button
+              disabled={isLoading || isParsing}
+              className="flex items-center gap-1 px-3 py-1 bg-white/60 border border-white/80 rounded-full text-xs text-gray-600 hover:bg-emerald-50/80 hover:text-emerald-700 hover:border-emerald-200 transition-all disabled:opacity-50"
+              onClick={() => fileInputRef.current?.click()}>
+              {isParsing
+                ? <><svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>解析中…</>
+                : <><span>📎</span>上传文件</>
+              }
+            </button>
+            <input ref={fileInputRef} type="file"
+              accept={supportedExtensions().join(',')}
+              className="hidden" onChange={handleFileSelect} />
           </div>
+
+          {/* File preview card */}
+          {pendingFile && (
+            <div className="mb-3 flex items-center gap-3 bg-emerald-50/80 border border-emerald-200/80 rounded-xl px-4 py-2.5 backdrop-blur-sm">
+              <span className="text-xl shrink-0">
+                {pendingFile.ext === 'docx' ? '📝' : pendingFile.ext === 'csv' || pendingFile.ext === 'xlsx' || pendingFile.ext === 'xls' ? '📊' : '📄'}
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800 truncate">{pendingFile.name}</p>
+                <p className="text-xs text-gray-500">
+                  {(pendingFile.size / 1024).toFixed(1)} KB
+                  {pendingFile.truncated && ' · 内容较长，已截取前段'}
+                  {pendingFile.sheets && pendingFile.sheets.length > 1 && ` · ${pendingFile.sheets.length} 个工作表`}
+                </p>
+              </div>
+              <button onClick={() => setPendingFile(null)}
+                className="text-gray-400 hover:text-red-400 transition-colors shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {/* File parse error */}
+          {fileParseError && (
+            <div className="mb-3 flex items-center gap-2 bg-red-50/80 border border-red-200 rounded-xl px-4 py-2.5 text-sm text-red-600">
+              <span>⚠</span>{fileParseError}
+              <button onClick={() => setFileParseError(null)} className="ml-auto text-red-400 hover:text-red-600">✕</button>
+            </div>
+          )}
 
           {/* Input */}
           <div className="flex gap-3 items-end">
@@ -334,13 +414,17 @@ export default function ChatPage({
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
-              placeholder={isLoading ? 'AI 正在回答中…' : '输入问题，Enter 发送，Shift+Enter 换行…'}
+              placeholder={
+                isLoading ? 'AI 正在回答中…'
+                : pendingFile ? '可补充分析说明（选填），直接发送即可分析文件…'
+                : '输入问题，Enter 发送，Shift+Enter 换行…'
+              }
               rows={1}
               className="flex-1 resize-none rounded-xl bg-white/70 border border-white/90 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100/60 transition-all disabled:bg-gray-50/50 disabled:cursor-not-allowed backdrop-blur-sm"
               style={{ minHeight: '44px', maxHeight: '160px' }}
             />
             <button onClick={handleSend}
-              disabled={!input.trim() || isLoading}
+              disabled={(!input.trim() && !pendingFile) || isLoading}
               className="w-11 h-11 rounded-xl text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-md hover:opacity-90 active:scale-95 shrink-0"
               style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
               {isLoading ? (
