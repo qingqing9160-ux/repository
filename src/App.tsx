@@ -1,5 +1,40 @@
-import BriefFlowHero from './components/BriefFlowHero'
+import './index.css'
 
-export default function App() {
-  return <BriefFlowHero />
-}
+const Icon=({name}:{name:string})=> <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><use href={`#${name}`}/></svg>
+
+const officers=[
+  [33,31,'police'],[41,36,'police'],[47,43,'chief'],[52,35,'police'],[59,34,'chief'],[67,25,'fire'],[76,18,'fire'],[85,44,'fire'],
+  [28,45,'chief'],[38,44,'photo'],[44,55,'chief'],[35,58,'police'],[36.5,59,'police'],[37.5,57,'chief'],[52,62,'police'],[57,69,'police'],
+  [20,61,'fire'],[21.5,64,'fire'],[23.5,66,'chief'],[27,72,'chief'],[33,82,'police'],[20.5,88,'fire'],[27,92,'chief'],[48,74,'police'],
+  [50,74,'chief'],[72,92,'chief'],[74,90,'chief']
+];
+const squarePins=[[6,67,'home'],[38,50,'shield'],[36,34,'home'],[61,70,'home'],[66,81,'shield'],[41,87,'shield'],[31,76,'shield'],[13,80,'shield'],[45,93,'shield'],[69,45,'shield']];
+
+function Symbols(){return <svg className="symbols" xmlns="http://www.w3.org/2000/svg"><defs>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" strokeWidth="2"/><path d="m15.5 15.5 5 5" stroke="currentColor" strokeWidth="2"/></symbol>
+  <symbol id="layers" viewBox="0 0 24 24"><path d="m3 7 9-4 9 4-9 4-9-4Zm0 5 9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" strokeWidth="2"/></symbol>
+  <symbol id="list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12" stroke="currentColor" strokeWidth="2"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M12 22s7-7.2 7-13A7 7 0 1 0 5 9c0 5.8 7 13 7 13Z" fill="none" stroke="currentColor" strokeWidth="2"/><circle cx="12" cy="9" r="2.4" fill="currentColor"/></symbol>
+  <symbol id="gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M19 5l-2 2M7 17l-2 2" stroke="currentColor" strokeWidth="2"/></symbol>
+  <symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M4 21c1-5 4-7 8-7s7 2 8 7" fill="none" stroke="currentColor" strokeWidth="2"/></symbol>
+  <symbol id="radio" viewBox="0 0 24 24"><path d="M4 17V7m16 10V7M8 14v-4m8 4v-4M12 4v16" stroke="currentColor" strokeWidth="2"/><path d="M2 5c2-2 4-3 6-4m14 4c-2-2-4-3-6-4" fill="none" stroke="currentColor" strokeWidth="2"/></symbol>
+  <symbol id="video" viewBox="0 0 24 24"><path d="M3 6h13v12H3z" fill="currentColor"/><path d="m16 10 6-4v12l-6-4z" fill="currentColor"/></symbol>
+  <symbol id="team" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="17" cy="8" r="3" fill="currentColor"/><path d="M2 20v-4c0-3 2-5 6-5s6 2 6 5v4m-1 0v-4c0-2 1-4 4-4s5 2 5 4v4" fill="currentColor"/></symbol>
+  <symbol id="doc" viewBox="0 0 24 24"><path d="M5 2h11l4 4v16H5z" fill="none" stroke="currentColor" strokeWidth="2"/><path d="M15 2v5h5M8 12h8M8 16h8" stroke="currentColor" strokeWidth="2"/></symbol>
+ </defs></svg>}
+
+function Header(){return <><header><div className="brandmark">◇</div><div className="brandtext"><b>SmartOne Dispatch</b><small>PUC 4.3 · 深圳市公安局</small></div><span className="duty">值守中</span><div className="global-search"><Icon name="search"/><span>搜索事件、人员、设备、号码、位置...</span><kbd>⌘K</kbd></div><div className="header-right"><span className="net"><i/>网络正常</span><span className="notify">♧<em>12</em></span><span className="notify">▤<em className="blue">6</em></span><div className="avatar">调</div><div className="operator"><b>调度员 01</b><small>南山指挥中心</small></div><time>2026-08-12 19:23:37</time></div></header><div className="tabs"><span>地图</span><b>任务管理　×</b><div className="layout">布局 <strong>地图优先</strong><i>均衡</i><i>视频优先</i></div></div></>}
+
+function SideNav(){return <nav className="sidenav">{['radio','radio','video','team','radio','doc','user'].map((x,i)=><div className={i===0?'active':''} key={i}><Icon name={x}/></div>)}</nav>}
+
+const Check=({on=false}:{on?:boolean})=><span className={'check '+(on?'on':'')}>{on?'✓':''}</span>;
+function Resource(){return <aside className="resources"><div className="resource-head"><b>资源中心</b><a>展开为工作页</a><span>×</span></div><div className="resource-search"><Icon name="search"/>搜索名称 / 号码 / 设备</div><div className="filters"><b>全部</b><span>在线</span><span>附近</span><span>收藏</span></div><div className="stats"><div><b>4</b><small>在线</small></div><div><b>1</b><small>执勤</small></div><div><b>2</b><small>离线</small></div></div><section className="tree"><div className="org">我的组织　南山分局</div><div className="row"><span>⌄　♙　张三</span><em className="free">空闲</em><Check/></div><div className="row indent"><span>⊞　执法记录仪 8821</span><em className="free">空闲</em><Check/></div><div className="selected"><div className="row"><span>♙　李四</span><em className="busy">执勤</em><Check on/></div><div className="row"><span>♙　王五</span><em>离线</em><Check on/></div><div className="row"><span>▱　巡逻车 032</span><em>离线</em><Check on/></div></div><div className="org second">协同组织</div><div className="row"><span>▱　消防车 F-01</span><em className="free">空闲</em><Check/></div><div className="row"><span>♙　赵六</span><em className="free">空闲</em><Check/></div></section><div className="resource-foot"><span>已选 3 个资源</span><button>批量调派</button></div></aside>}
+
+function MapBackdrop(){return <svg className="map-svg" viewBox="0 0 1600 1000" preserveAspectRatio="none"><path className="water" d="M0 430C170 405 170 520 310 544s120 95 280 80 152-116 302-79 180 26 300 0 203 8 408 64V1000H0Z"/>{Array.from({length:34},(_,i)=><path key={'a'+i} className={i%5===0?'road major':'road'} d={`M${-100+i*58} ${60+(i%7)*110} C ${180+i*18} ${180+(i%4)*95}, ${650+i*11} ${20+(i%8)*110}, ${1700} ${120+(i%6)*145}`}/>)}{Array.from({length:18},(_,i)=><path key={'b'+i} className={i%4===0?'road major':'road'} d={`M${70+i*90} -30 C ${180+(i%5)*210} 260, ${20+i*92} 640, ${260+i*83} 1050`}/>)}<g className="map-labels"><text x="210" y="300">肇庆市</text><text x="530" y="260">广州市</text><text x="805" y="390">广州白云国际机场</text><text x="700" y="655">佛山</text><text x="1250" y="690">东莞</text><text x="900" y="545">天河区</text><text x="420" y="520">三水区</text><text x="1110" y="485">增城区</text><text x="570" y="820">西樵山风景名胜区</text><text x="950" y="830">番禺区</text><text x="1360" y="215">从化区</text><text x="740" y="180">白云山风景区</text></g></svg>}
+
+function Marker({x,y,type}:{x:number,y:number,type:string}){return <div className={'marker '+type} style={{left:x+'%',top:y+'%'}}>{type==='fire'?<><span className="helmet">▲</span><b>消</b></>:type==='photo'?<span className="face">人</span>:<><span className="cap"/><span className="head"/><span className="shirt"/></>}</div>}
+function Toolbar(){return <div className="toolbar">{['layers','search','list','pin','pin','gear','radio','video','doc'].map((n,i)=><button className={i===0?'active':''} key={i}><Icon name={n}/></button>)}</div>}
+function Events(){return <aside className="events"><div className="event-title"><b><i/> 实时事件</b><span>3 未处置</span>⌄</div><div className="event-filters"><b>紧急</b><span>全部</span><a>查看全部 →</a></div><Event p="P0" title="枪声探测告警" addr="深圳市南山区科苑路 88 号" duration="03:14" trust="92%"/><Event p="P1" title="南山科技园火警" addr="南山科技园 B 区 3 号楼" duration="08:26" trust="87%"/></aside>}
+function Event({p,title,addr,duration,trust}:{p:string,title:string,addr:string,duration:string,trust:string}){return <div className={'event-card '+p.toLowerCase()}><i className="event-dot"/><div><b className="priority">{p}</b><strong>{title}</strong></div><p>{addr}</p><small>持续　{duration}　可信 {trust}</small><em>待处置</em></div>}
+function Map(){return <main className="map"><MapBackdrop/><Toolbar/>{officers.map((p,i)=><Marker key={i} x={p[0] as number} y={p[1] as number} type={p[2] as string}/>)}{squarePins.map((p,i)=><div key={'s'+i} className={'square-pin '+p[2]} style={{left:p[0]+'%',top:p[1]+'%'}}>{p[2]==='home'?'⌂':'✦'}</div>)}<Events/><div className="scale"><span>5 公里</span></div></main>}
+export default function App(){return <div className="viewport"><Symbols/><Header/><div className="work"><SideNav/><Resource/><Map/></div><footer>22.534898, 114.046409</footer></div>}
